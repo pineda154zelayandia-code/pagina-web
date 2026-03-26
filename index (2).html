@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Hub</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+}
+
+/* NAVBAR */
+header {
+    background: #131921;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    flex-wrap: wrap;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.search input {
+    padding: 8px;
+    width: 100%;
+}
+
+/* FILTROS */
+.filters {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+}
+
+.filters button {
+    padding: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.filters .active {
+    background: orange;
+    color: white;
+}
+
+/* PRODUCTOS */
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    padding: 15px;
+}
+
+.card {
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.card img {
+    width: 100%;
+    height: 140px;
+    object-fit: contain;
+}
+
+button {
+    background: orange;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* CARRITO */
+.cart {
+    position: fixed;
+    right: -300px;
+    top: 0;
+    width: 280px;
+    height: 100%;
+    background: white;
+    padding: 15px;
+    transition: 0.3s;
+}
+
+.cart.open {
+    right: 0;
+}
+
+.close-btn {
+    background: red;
+    color: white;
+    padding: 5px;
+    cursor: pointer;
+    border: none;
+    margin-bottom: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🎮 Game Hub</div>
+    <div style="flex:1; margin:10px;">
+        <input type="text" id="search" placeholder="Buscar productos...">
+    </div>
+    <button onclick="toggleCart()">🛒 (<span id="count">0</span>)</button>
+</header>
+
+<div class="filters">
+    <button onclick="filter('all')" class="active">Todo</button>
+    <button onclick="filter('actual')">Actuales</button>
+    <button onclick="filter('retro')">Retro</button>
+    <button onclick="filter('personal')">Personalización</button>
+</div>
+
+<div class="products" id="products"></div>
+
+<div class="cart" id="cart">
+    <button class="close-btn" onclick="toggleCart()">Cerrar ❌</button>
+    <h2>Carrito</h2>
+    <div id="cart-items"></div>
+    <h3>Total: $<span id="total">0</span></h3>
+</div>
+
+<script>
+const products = [
+    {name:"PS5", price:500, category:"actual", img:"https://m.media-amazon.com/images/I/619BkvKW35L._AC_SL1500_.jpg"},
+    {name:"Xbox Series X", price:500, category:"actual", img:"https://m.media-amazon.com/images/I/61-jjE67uqL._AC_SL1500_.jpg"},
+    {name:"Nintendo Switch", price:300, category:"actual", img:"https://m.media-amazon.com/images/I/61-PblYntsL._AC_SL1500_.jpg"},
+
+    {name:"PS2", price:120, category:"retro", img:"https://m.media-amazon.com/images/I/515Ceao0c3L._SX342_.jpg"},
+    {name:"Xbox 360", price:150, category:"retro", img:"https://m.media-amazon.com/images/I/71P+xD-yk3L._SY445_.jpg"},
+    {name:"Nintendo Wii", price:130, category:"retro", img:"https://m.media-amazon.com/images/I/81us6cvlPXL._SX522_.jpg"},
+
+    {name:"Mando PS5 Personalizado", price:60, category:"personal", img:"https://m.media-amazon.com/images/I/41BVv5DM8dL._SX342_SY445_QL70_FMwebp_.jpg"},
+    {name:"Skin PS5", price:25, category:"personal", img:"https://m.media-amazon.com/images/I/71H-o54ht0L._AC_SX425_.jpg"}
+];
+
+let cart = [];
+let currentFilter = "all";
+
+function renderProducts() {
+    const container = document.getElementById("products");
+    container.innerHTML = "";
+
+    const search = document.getElementById("search").value.toLowerCase();
+
+    products
+    .filter(p => currentFilter === "all" || p.category === currentFilter)
+    .filter(p => p.name.toLowerCase().includes(search))
+    .forEach(p => {
+        container.innerHTML += `
+            <div class="card">
+                <img src="${p.img}" onerror="this.src='https://via.placeholder.com/200?text=No+Image'">
+                <h3>${p.name}</h3>
+                <p>$${p.price}</p>
+                <button onclick="addToCart('${p.name}', ${p.price})">Agregar</button>
+            </div>
+        `;
+    });
+}
+
+function filter(cat) {
+    currentFilter = cat;
+    document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
+    event.target.classList.add("active");
+    renderProducts();
+}
+
+function addToCart(name, price) {
+    cart.push({name, price});
+    updateCart();
+}
+
+function updateCart() {
+    document.getElementById("count").innerText = cart.length;
+
+    let html = "";
+    let total = 0;
+
+    cart.forEach(item => {
+        total += item.price;
+        html += `<div>${item.name} - $${item.price}</div>`;
+    });
+
+    document.getElementById("cart-items").innerHTML = html;
+    document.getElementById("total").innerText = total;
+}
+
+function toggleCart() {
+    document.getElementById("cart").classList.toggle("open");
+}
+
+document.getElementById("search").addEventListener("input", renderProducts);
+
+renderProducts();
+</script>
+
+</body>
+</html>
